@@ -12,7 +12,6 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.f2prateek.javafmt'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
@@ -38,7 +37,7 @@ dependencies {
 
     implementation "android.arch.lifecycle:runtime:${archComponentsVersion}"
     implementation "android.arch.lifecycle:extensions:${archComponentsVersion}"
-    kapt  "android.arch.lifecycle:compiler:${archComponentsVersion}"
+    kapt "android.arch.lifecycle:compiler:${archComponentsVersion}"
 
     // ----------------------------------
     //  Rx dependencies
@@ -87,6 +86,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
-        pickFirst  'META-INF/rxjava.properties'
+        pickFirst 'META-INF/rxjava.properties'
     }
 }
