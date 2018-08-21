@@ -4,9 +4,10 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.3.0-alpha06'
         classpath 'com.f2prateek.javafmt:javafmt:0.1.2'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -24,16 +25,16 @@ allprojects {
     }
 
     ext {
-        sdkVersion = 24
-        buildToolsVrs = "25.0.0"
+        sdkVersion = 27
+        buildToolsVrs = "27.0.3"
 
-        kotlinVersion = "1.1.3-2"
+        kotlinVersion = "1.2.51"
 
-        archComponentsVersion = "1.0.0-alpha3"
-        butterKnifeVersion = '8.5.1'
+        archComponentsVersion = "1.1.0"
+        butterKnifeVersion = '8.8.1'
         mockitoKotlinVersion = "1.4.0"
         okhttpVersion = "3.0.1"
-        retrofitVersion = "2.0.0"
-        supportLibVersion = "25.3.1"
+        retrofitVersion = "2.4.0"
+        supportLibVersion = "27.1.1"
     }
 }

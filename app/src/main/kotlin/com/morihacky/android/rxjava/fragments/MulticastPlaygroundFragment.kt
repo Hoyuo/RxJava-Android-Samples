@@ -7,7 +7,11 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.Spinner
+import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -17,11 +21,14 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
-class MulticastPlaygroundFragment : BaseFragment() {
+class MultiCastPlaygroundFragment : BaseFragment() {
 
-    @BindView(R.id.list_threading_log) lateinit var logList: ListView
-    @BindView(R.id.dropdown) lateinit var pickOperatorDD: Spinner
-    @BindView(R.id.msg_text) lateinit var messageText: TextView
+    @BindView(R.id.list_threading_log)
+    lateinit var logList: ListView
+    @BindView(R.id.dropdown)
+    lateinit var pickOperatorDD: Spinner
+    @BindView(R.id.msg_text)
+    lateinit var messageText: TextView
 
     private lateinit var sharedObservable: Observable<Long>
     private lateinit var adapter: LogAdapter
@@ -30,14 +37,16 @@ class MulticastPlaygroundFragment : BaseFragment() {
     private var disposable1: Disposable? = null
     private var disposable2: Disposable? = null
 
-    override fun onCreateView(inflater: LayoutInflater?,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val layout = inflater!!.inflate(R.layout.fragment_multicast_playground, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val layout = inflater.inflate(R.layout.fragment_multicast_playground, container, false)
         ButterKnife.bind(this, layout)
 
-        _setupLogger()
-        _setupDropdown()
+        setupLogger()
+        setupDropdown()
 
         return layout
     }
@@ -47,15 +56,14 @@ class MulticastPlaygroundFragment : BaseFragment() {
 
         disposable1?.let {
             it.dispose()
-            _log("subscriber 1 disposed")
+            log("subscriber 1 disposed")
             disposable1 = null
             return
         }
 
-        disposable1 =
-                sharedObservable
-                        .doOnSubscribe { _log("subscriber 1 (subscribed)") }
-                        .subscribe({ long -> _log("subscriber 1: onNext $long") })
+        disposable1 = sharedObservable
+                .doOnSubscribe { log("subscriber 1 (subscribed)") }
+                .subscribe { long -> log("subscriber 1: onNext $long") }
 
     }
 
@@ -63,15 +71,14 @@ class MulticastPlaygroundFragment : BaseFragment() {
     fun onBtn2Click() {
         disposable2?.let {
             it.dispose()
-            _log("subscriber 2 disposed")
+            log("subscriber 2 disposed")
             disposable2 = null
             return
         }
 
-        disposable2 =
-                sharedObservable
-                        .doOnSubscribe { _log("subscriber 2 (subscribed)") }
-                        .subscribe({ long -> _log("subscriber 2: onNext $long") })
+        disposable2 = sharedObservable
+                .doOnSubscribe { log("subscriber 2 (subscribed)") }
+                .subscribe { long -> log("subscriber 2: onNext $long") }
     }
 
     @OnClick(R.id.btn_3)
@@ -83,9 +90,9 @@ class MulticastPlaygroundFragment : BaseFragment() {
     // -----------------------------------------------------------------------------------
     // Method that help wiring up the example (irrelevant to RxJava)
 
-    private fun _log(logMsg: String) {
+    private fun log(logMsg: String) {
 
-        if (_isCurrentlyOnMainThread()) {
+        if (isCurrentlyOnMainThread()) {
             logs.add(0, logMsg + " (main thread) ")
             adapter.clear()
             adapter.addAll(logs)
@@ -100,13 +107,13 @@ class MulticastPlaygroundFragment : BaseFragment() {
         }
     }
 
-    private fun _setupLogger() {
+    private fun setupLogger() {
         logs = ArrayList<String>()
-        adapter = LogAdapter(activity, ArrayList<String>())
+        adapter = LogAdapter(context!!, ArrayList<String>())
         logList.adapter = adapter
     }
 
-    private fun _setupDropdown() {
+    private fun setupDropdown() {
         pickOperatorDD.adapter = ArrayAdapter<String>(context,
                 android.R.layout.simple_spinner_dropdown_item,
                 arrayOf(".publish().refCount()",
@@ -121,41 +128,40 @@ class MulticastPlaygroundFragment : BaseFragment() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, index: Int, p3: Long) {
 
                 val sourceObservable = Observable.interval(0L, 3, TimeUnit.SECONDS)
-                        .doOnSubscribe { _log("observer (subscribed)") }
-                        .doOnDispose { _log("observer (disposed)") }
-                        .doOnTerminate { _log("observer (terminated)") }
+                        .doOnSubscribe { log("observer (subscribed)") }
+                        .doOnDispose { log("observer (disposed)") }
+                        .doOnTerminate { log("observer (terminated)") }
 
-                sharedObservable =
-                        when (index) {
-                            0 -> {
-                                messageText.setText(R.string.msg_demo_multicast_publishRefCount)
-                                sourceObservable.publish().refCount()
-                            }
-                            1 -> {
-                                messageText.setText(R.string.msg_demo_multicast_publishAutoConnect)
-                                sourceObservable.publish().autoConnect(2)
-                            }
-                            2 -> {
-                                messageText.setText(R.string.msg_demo_multicast_replayAutoConnect)
-                                sourceObservable.replay(1).autoConnect(2)
-                            }
-                            3 -> {
-                                messageText.setText(R.string.msg_demo_multicast_replayRefCount)
-                                sourceObservable.replay(1).refCount()
-                            }
-                            4 -> {
-                                messageText.setText(R.string.msg_demo_multicast_replayingShare)
-                                sourceObservable.replayingShare()
-                            }
-                            else -> throw RuntimeException("got to pick an op yo!")
-                        }
+                sharedObservable = when (index) {
+                    0 -> {
+                        messageText.setText(R.string.msg_demo_multicast_publishRefCount)
+                        sourceObservable.publish().refCount()
+                    }
+                    1 -> {
+                        messageText.setText(R.string.msg_demo_multicast_publishAutoConnect)
+                        sourceObservable.publish().autoConnect(2)
+                    }
+                    2 -> {
+                        messageText.setText(R.string.msg_demo_multicast_replayAutoConnect)
+                        sourceObservable.replay(1).autoConnect(2)
+                    }
+                    3 -> {
+                        messageText.setText(R.string.msg_demo_multicast_replayRefCount)
+                        sourceObservable.replay(1).refCount()
+                    }
+                    4 -> {
+                        messageText.setText(R.string.msg_demo_multicast_replayingShare)
+                        sourceObservable.replayingShare()
+                    }
+                    else -> throw RuntimeException("got to pick an op yo!")
+                }
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
     }
 
-    private fun _isCurrentlyOnMainThread(): Boolean {
+    private fun isCurrentlyOnMainThread(): Boolean {
         return Looper.myLooper() == Looper.getMainLooper()
     }
 

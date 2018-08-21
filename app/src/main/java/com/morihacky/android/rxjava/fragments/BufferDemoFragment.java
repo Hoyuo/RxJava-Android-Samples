@@ -3,6 +3,7 @@ package com.morihacky.android.rxjava.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,119 +43,118 @@ import timber.log.Timber;
  */
 public class BufferDemoFragment extends BaseFragment {
 
-  @BindView(R.id.list_threading_log)
-  ListView _logsList;
+    @BindView(R.id.list_threading_log)
+    ListView mLogsListView;
 
-  @BindView(R.id.btn_start_operation)
-  Button _tapBtn;
+    @BindView(R.id.btn_start_operation)
+    Button mTapBtn;
 
-  private LogAdapter _adapter;
-  private List<String> _logs;
+    private LogAdapter mLogAdapter;
+    private List<String> mLogs;
 
-  private Disposable _disposable;
-  private Unbinder unbinder;
+    private Disposable mDisposable;
+    private Unbinder mUnbinder;
 
-  @Override
-  public void onResume() {
-    super.onResume();
-    _disposable = _getBufferedDisposable();
-  }
-
-  @Override
-  public void onPause() {
-    super.onPause();
-    _disposable.dispose();
-  }
-
-  @Override
-  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-    _setupLogger();
-  }
-
-  @Override
-  public View onCreateView(
-      LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    View layout = inflater.inflate(R.layout.fragment_buffer, container, false);
-    unbinder = ButterKnife.bind(this, layout);
-    return layout;
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    unbinder.unbind();
-  }
-
-  // -----------------------------------------------------------------------------------
-  // Main Rx entities
-
-  private Disposable _getBufferedDisposable() {
-    return RxView.clicks(_tapBtn)
-        .map(
-            onClickEvent -> {
-              Timber.d("--------- GOT A TAP");
-              _log("GOT A TAP");
-              return 1;
-            })
-        .buffer(2, TimeUnit.SECONDS)
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribeWith(
-            new DisposableObserver<List<Integer>>() {
-
-              @Override
-              public void onComplete() {
-                // fyi: you'll never reach here
-                Timber.d("----- onCompleted");
-              }
-
-              @Override
-              public void onError(Throwable e) {
-                Timber.e(e, "--------- Woops on error!");
-                _log("Dang error! check your logs");
-              }
-
-              @Override
-              public void onNext(List<Integer> integers) {
-                Timber.d("--------- onNext");
-                if (integers.size() > 0) {
-                  _log(String.format("%d taps", integers.size()));
-                } else {
-                  Timber.d("--------- No taps received ");
-                }
-              }
-            });
-  }
-
-  // -----------------------------------------------------------------------------------
-  // Methods that help wiring up the example (irrelevant to RxJava)
-
-  private void _setupLogger() {
-    _logs = new ArrayList<>();
-    _adapter = new LogAdapter(getActivity(), new ArrayList<>());
-    _logsList.setAdapter(_adapter);
-  }
-
-  private void _log(String logMsg) {
-
-    if (_isCurrentlyOnMainThread()) {
-      _logs.add(0, logMsg + " (main thread) ");
-      _adapter.clear();
-      _adapter.addAll(_logs);
-    } else {
-      _logs.add(0, logMsg + " (NOT main thread) ");
-
-      // You can only do below stuff on main thread.
-      new Handler(Looper.getMainLooper())
-          .post(
-              () -> {
-                _adapter.clear();
-                _adapter.addAll(_logs);
-              });
+    @Override
+    public void onResume() {
+        super.onResume();
+        mDisposable = getBufferedDisposable();
     }
-  }
 
-  private boolean _isCurrentlyOnMainThread() {
-    return Looper.myLooper() == Looper.getMainLooper();
-  }
+    @Override
+    public void onPause() {
+        super.onPause();
+        mDisposable.dispose();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setupLogger();
+    }
+
+    @Override
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        View layout = inflater.inflate(R.layout.fragment_buffer, container, false);
+        mUnbinder = ButterKnife.bind(this, layout);
+        return layout;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
+    }
+
+    // -----------------------------------------------------------------------------------
+    // Main Rx entities
+
+    private Disposable getBufferedDisposable() {
+        return RxView.clicks(mTapBtn)
+                .map(onClickEvent -> {
+                    Timber.d("--------- GOT A TAP");
+                    log("GOT A TAP");
+                    return 1;
+                })
+                .buffer(2, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<Integer>>() {
+
+                    @Override
+                    public void onComplete() {
+                        // fyi: you'll never reach here
+                        Timber.d("----- onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.e(e, "--------- Woops on error!");
+                        log("Dang error! check your logs");
+                    }
+
+                    @Override
+                    public void onNext(List<Integer> integers) {
+                        Timber.d("--------- onNext");
+                        if (integers.size() > 0) {
+                            log(String.format("%d taps", integers.size()));
+                        } else {
+                            Timber.d("--------- No taps received ");
+                        }
+                    }
+                });
+    }
+
+    // -----------------------------------------------------------------------------------
+    // Methods that help wiring up the example (irrelevant to RxJava)
+
+    private void setupLogger() {
+        mLogs = new ArrayList<>();
+        mLogAdapter = new LogAdapter(getActivity(), new ArrayList<>());
+        mLogsListView.setAdapter(mLogAdapter);
+    }
+
+    private void log(String logMsg) {
+
+        if (isCurrentlyOnMainThread()) {
+            mLogs.add(0, logMsg + " (main thread) ");
+            mLogAdapter.clear();
+            mLogAdapter.addAll(mLogs);
+        } else {
+            mLogs.add(0, logMsg + " (NOT main thread) ");
+
+            // You can only do below stuff on main thread.
+            new Handler(Looper.getMainLooper())
+                    .post(() -> {
+                        mLogAdapter.clear();
+                        mLogAdapter.addAll(mLogs);
+                    });
+        }
+    }
+
+    private boolean isCurrentlyOnMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
 }

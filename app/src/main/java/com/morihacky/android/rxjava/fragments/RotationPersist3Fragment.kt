@@ -27,7 +27,7 @@ class RotationPersist3Fragment : BaseFragment() {
     @BindView(R.id.list_threading_log)
     lateinit var logList: ListView
     lateinit var adapter: LogAdapter
-    lateinit var sharedViewModel: SharedViewModel
+    var sharedViewModel: SharedViewModel? = null
 
     private var logs: MutableList<String> = ArrayList()
     private var disposables = CompositeDisposable()
@@ -36,27 +36,32 @@ class RotationPersist3Fragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedViewModel = ViewModelProviders.of(activity).get(SharedViewModel::class.java)
+        sharedViewModel = activity?.let {
+            ViewModelProviders.of(it).get(SharedViewModel::class.java)
+        }
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val layout = inflater!!.inflate(R.layout.fragment_rotation_persist, container, false)
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val layout = inflater.inflate(R.layout.fragment_rotation_persist, container, false)
         ButterKnife.bind(this, layout)
         return layout
     }
 
     @OnClick(R.id.btn_rotate_persist)
     fun startOperationFromWorkerFrag() {
-        logs = ArrayList<String>()
+        logs = ArrayList()
         adapter.clear()
 
-        disposables +=
-                sharedViewModel
-                        .sourceStream()
-                        .subscribe({ l ->
-                            _log("Received element $l")
-                        })
+        sharedViewModel ?: return
+
+        disposables += sharedViewModel!!.sourceStream()
+                .subscribe { l ->
+                    log("Received element $l")
+                }
     }
 
     // -----------------------------------------------------------------------------------
@@ -65,7 +70,7 @@ class RotationPersist3Fragment : BaseFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        _setupLogger()
+        setupLogger()
     }
 
     override fun onPause() {
@@ -73,34 +78,32 @@ class RotationPersist3Fragment : BaseFragment() {
         disposables.clear()
     }
 
-    private fun _setupLogger() {
-        logs = ArrayList<String>()
+    private fun setupLogger() {
+        logs = ArrayList()
         adapter = LogAdapter(activity, ArrayList<String>())
         logList.adapter = adapter
     }
 
-    private fun _log(logMsg: String) {
+    private fun log(logMsg: String) {
         logs.add(0, logMsg)
 
         // You can only do below stuff on main thread.
-        Handler(getMainLooper())
-                .post {
-                    adapter.clear()
-                    adapter.addAll(logs)
-                }
+        Handler(getMainLooper()).post {
+            adapter.clear()
+            adapter.addAll(logs)
+        }
     }
 }
 
 class SharedViewModel : ViewModel() {
     var disposable: Disposable? = null
 
-    var sharedObservable: Flowable<Long> =
-            Flowable.interval(1, TimeUnit.SECONDS)
-                    .take(20)
-                    .doOnNext { l -> Timber.tag("KG").d("onNext $l") }
-                    // .replayingShare()
-                    .replay(1)
-                    .autoConnect(1) { t -> disposable = t }
+    var sharedObservable: Flowable<Long> = Flowable.interval(1, TimeUnit.SECONDS)
+            .take(20)
+            .doOnNext { l -> Timber.tag("KG").d("onNext $l") }
+            // .replayingShare()
+            .replay(1)
+            .autoConnect(1) { t -> disposable = t }
 
     fun sourceStream(): Flowable<Long> {
         return sharedObservable

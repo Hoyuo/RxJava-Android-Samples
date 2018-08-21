@@ -12,8 +12,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
 
         <TextView
@@ -25,8 +24,7 @@
             android:gravity="center"
             android:padding="@dimen/text_micro"
             android:text="@string/info_about_the_demo_will_show_up_here"
-            android:textColor="@color/white"
-            />
+            android:textColor="@color/white" />
 
 
         <LinearLayout
@@ -35,16 +33,14 @@
             android:background="@color/colorPrimaryDark"
             android:gravity="center_vertical"
             android:orientation="vertical"
-            android:padding="@dimen/activity_horizontal_margin"
-            >
+            android:padding="@dimen/activity_horizontal_margin">
 
             <Button
                 android:id="@+id/btn_pseudoCache_concat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/concat"
-                />
+                android:text="@string/concat" />
 
 
             <Button
@@ -52,8 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/concat_eager"
-                />
+                android:text="@string/concat_eager" />
 
 
             <Button
@@ -61,8 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/merge"
-                />
+                android:text="@string/merge" />
 
 
             <Button
@@ -70,24 +64,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/merge_n_slower_disk"
-                />
+                android:text="@string/merge_n_slower_disk" />
 
             <Button
                 android:id="@+id/btn_pseudoCache_mergeOptimized"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/merge_n_optimized"
-                />
+                android:text="@string/merge_n_optimized" />
 
             <Button
                 android:id="@+id/btn_pseudoCache_mergeOptimizedSlowDisk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/merge_n_optimized_slow_disk"
-                />
+                android:text="@string/merge_n_optimized_slow_disk" />
 
         </LinearLayout>
 
@@ -97,8 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            />
+            android:background="@color/colorPrimary" />
 
 
     </LinearLayout>
@@ -108,6 +98,5 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/colorPrimaryDark"
-        />
+        android:background="@color/colorPrimaryDark" />
 </LinearLayout>
